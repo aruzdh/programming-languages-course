@@ -1,0 +1,45 @@
+# macOS
+.DS_Store
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.egg
+*.egg-info/
+dist/
+build/
+*.so
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.iml
+*.ipr
+*.iws
+target/
+out/
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# Logs
+logs/
+*.log
+
+# Environment variables
+.env
+
+# Other
+*.swp
+*.swo
