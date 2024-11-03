@@ -1,20 +1,28 @@
 
 #lang racket
 
-(provide (all-defined-out)) ;; so we can put tests in a second file
+(provide (all-defined-out))
 
 ; 1) Write a function sequence that takes 3 arguments low, high, and stride, all assumed to be numbers.
 ; Further assume stride is positive. sequence produces a list of numbers from low to high (including
 ; low and possibly high) separated by stride and in sorted order. Sample solution: 4 lines.
 
+(define (sequence low high stride)
+  (if (> low high)
+      null
+      (cons low (sequence (+ low stride) high stride ))))
 
+#| (define (sequence-tr low high stride) |#
+#|   (define helper (lambda (low acc) (if (> low high) acc (helper (+ low stride) (append acc (cons low null)))))) |#
+#|   (helper low null)) |#
 
 ; 2) Write a function string-append-map that takes a list of strings xs and a string suffix and returns a
 ; list of strings. Each element of the output should be the corresponding element of the input appended
 ; with suffix (with no extra space between the element and suffix). You must use Racket-library
 ; functions map and string-append. Sample solution: 2 lines.
 
-
+(define (string-append-map xs suffix)
+  (map (lambda (str) (string-append str suffix)) xs ))
 
 ; 3) Write a function list-nth-mod that takes a list xs and a number n. If the number is negative,
 ; terminate the computation with (error "list-nth-mod: negative number"). Else if the list is
