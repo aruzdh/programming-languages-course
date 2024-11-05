@@ -13,6 +13,10 @@
 (define ones (lambda () (cons 1 ones)))
 (define a 2)
 
+(define powers-of-two
+  (letrec ([f (lambda (x) (cons x (lambda () (f (* x 2)))))])
+    (lambda () (f 2))))
+
 (define tests
   (test-suite
    "Sample tests for Assignment 4"
@@ -25,14 +29,15 @@
                   (list "dan" "dog" "curry" "dog2")
                   ".jpg") '("dan.jpg" "dog.jpg" "curry.jpg" "dog2.jpg") "string-append-map test")
 
-   ; list-nth-mod test
-   ; (check-equal? (list-nth-mod (list 0 1 2 3 4) 2) 2 "list-nth-mod test")
+   ;list-nth-mod test
+   (check-equal? (list-nth-mod (list 0 1 2 3 4) 2) 2 "list-nth-mod test")
 
    ; stream-for-n-steps test
-   ; (check-equal? (stream-for-n-steps ones 2) (list 1 1) "stream-for-n-steps test")
+   (check-equal? (stream-for-n-steps ones 2) (list 1 1) "stream-for-n-steps test")
+   (check-equal? (stream-for-n-steps powers-of-two 6) (list 2 4 8 16 32 64) "stream-for-n-steps test")
 
    ; funny-number-stream test
-   ; (check-equal? (stream-for-n-steps funny-number-stream 16) (list 1 2 3 4 -5 6 7 8 9 -10 11 12 13 14 -15 16) "funny-number-stream test")
+   (check-equal? (stream-for-n-steps funny-number-stream 16) (list 1 2 3 4 -5 6 7 8 9 -10 11 12 13 14 -15 16) "funny-number-stream test")
 
    ; dan-then-dog test
    ; (check-equal? (stream-for-n-steps dan-then-dog 1) (list "dan.jpg") "dan-then-dog test")

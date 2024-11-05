@@ -12,9 +12,10 @@
       null
       (cons low (sequence (+ low stride) high stride ))))
 
-#| (define (sequence-tr low high stride) |#
-#|   (define helper (lambda (low acc) (if (> low high) acc (helper (+ low stride) (append acc (cons low null)))))) |#
-#|   (helper low null)) |#
+#;
+(define (sequence-tr low high stride)
+  (define helper (lambda (low acc) (if (> low high) acc (helper (+ low stride) (append acc (cons low null))))))
+  (helper low null))
 
 ; 2) Write a function string-append-map that takes a list of strings xs and a string suffix and returns a
 ; list of strings. Each element of the output should be the corresponding element of the input appended
@@ -31,20 +32,31 @@
 ; list’s length. Library functions length, remainder, car, and list-tail are all useful – see the Racket
 ; documentation. Sample solution is 6 lines.
 
-
+(define (list-nth-mod xs n)
+  (cond
+    [(negative? n) (error "list-nth-mod: negative number")]
+    [(empty? xs) (error "list-nth-mod: empty list")]
+    [#t (first (list-tail xs (remainder n (length xs))))])
+  )
 
 ; 4) Write a function stream-for-n-steps that takes a stream s and a number n. It returns a list holding
 ; the first n values produced by s in order. Assume n is non-negative. Sample solution: 5 lines. Note:
 ; You can test your streams with this function instead of the graphics code.
 
-
+(define (stream-for-n-steps s n)
+  (cond
+    [(= n 0) empty]
+    [#t (letrec ([curr (s)])
+          (cons (car curr) (stream-for-n-steps (cdr curr) (- n 1))))]))
 
 ; 5) Write a stream funny-number-stream that is like the stream of natural numbers (i.e., 1, 2, 3, ...)
 ; except numbers divisble by 5 are negated (i.e., 1, 2, 3, 4, -5, 6, 7, 8, 9, -10, 11, ...). Remember a stream
 ; is a thunk that when called produces a pair. Here the car of the pair will be a number and the cdr will
 ; be another stream.
 
-
+(define funny-number-stream
+  (letrec ([f (lambda (x) (cons (if (= (remainder x 5) 0) (- x) x) (lambda () (f (+ x 1)))))])
+    (lambda () (f 1))))
 
 ; 6) Write a stream dan-then-dog, where the elements of the stream alternate between the strings "dan.jpg"
 ; and "dog.jpg" (starting with "dan.jpg"). More specifically, dan-then-dog should be a thunk that
