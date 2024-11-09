@@ -63,7 +63,9 @@
 ; when called produces a pair of "dan.jpg" and a thunk that when called produces a pair of "dog.jpg"
 ; and a thunk that when called... etc. Sample solution: 4 lines.
 
-
+(define dan-then-dog
+  (letrec ([f (lambda (x) (cons x (lambda () (f (if (eq? x "dan.jpg") "dog.jpg" "dan.jpg")))))])
+    (lambda () (f "dan.jpg"))))
 
 ; 7) Write a function stream-add-zero that takes a stream s and returns another stream. If s would
 ; produce v for its ith element, then (stream-add-zero s) would produce the pair (0 . v) for its
@@ -71,7 +73,13 @@
 ; Note: One of the provided tests in the file using graphics uses (stream-add-zero dan-then-dog)
 ; with place-repeatedly.
 
+#| (define (stream-add-zero s) |#
+#|   (define curr (s)) |#
+#|   (define f (lambda () (cons (cons 0 (car curr)) (stream-add-zero (cdr curr))))) |#
+#|   f) |#
 
+(define (stream-add-zero s)
+  (lambda () (define curr (s)) (cons (cons 0 (car curr)) (stream-add-zero (cdr curr)))))
 
 ; 8) Write a function cycle-lists that takes two lists xs and ys and returns a stream. The lists may or
 ; may not be the same length, but assume they are both non-empty. The elements produced by the
@@ -83,7 +91,9 @@
 ; of the functions you wrote earlier. Use a recursive helper function that takes a number n and calls
 ; itself with (+ n 1) inside a thunk.
 
-
+(define (cycle-lists xs ys)
+  (define f (lambda (n) (cons (cons (list-nth-mod xs n) (list-nth-mod ys n)) (lambda () (f (+ n 1))))))
+  (lambda () (f 0)))
 
 ; 9) Write a function vector-assoc that takes a value v and a vector vec. It should behave like Racket’s
 ; assoc library function except (1) it processes a vector (Racket’s name for an array) instead of a list,

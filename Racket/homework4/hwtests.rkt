@@ -37,16 +37,27 @@
    (check-equal? (stream-for-n-steps powers-of-two 6) (list 2 4 8 16 32 64) "stream-for-n-steps test")
 
    ; funny-number-stream test
-   (check-equal? (stream-for-n-steps funny-number-stream 16) (list 1 2 3 4 -5 6 7 8 9 -10 11 12 13 14 -15 16) "funny-number-stream test")
+   (check-equal? (stream-for-n-steps funny-number-stream 16)
+                 (list 1 2 3 4 -5 6 7 8 9 -10 11 12 13 14 -15 16) "funny-number-stream test")
 
    ; dan-then-dog test
-   ; (check-equal? (stream-for-n-steps dan-then-dog 1) (list "dan.jpg") "dan-then-dog test")
+   (check-equal? (stream-for-n-steps dan-then-dog 1) (list "dan.jpg") "dan-then-dog test")
+   (check-equal? (stream-for-n-steps dan-then-dog 4)
+                 (list "dan.jpg" "dog.jpg" "dan.jpg" "dog.jpg") "dan-then-dog test")
+   (check-equal? (stream-for-n-steps dan-then-dog 5)
+                 (list "dan.jpg" "dog.jpg" "dan.jpg" "dog.jpg" "dan.jpg") "dan-then-dog test")
 
    ; stream-add-zero test
-   ; (check-equal? (stream-for-n-steps (stream-add-zero ones) 1) (list (cons 0 1)) "stream-add-zero test")
+   (check-equal? (stream-for-n-steps (stream-add-zero ones) 1) (list (cons 0 1)) "stream-add-zero test")
+   (check-equal? (stream-for-n-steps (stream-add-zero ones) 2) (list (cons 0 1)(cons 0 1)) "stream-add-zero test")
+   (check-equal? (stream-for-n-steps (stream-add-zero ones) 5)
+                 (list (cons 0 1)(cons 0 1)(cons 0 1)(cons 0 1)(cons 0 1)) "stream-add-zero test")
+   (check-equal? (stream-for-n-steps (stream-add-zero powers-of-two) 5)
+                 (list (cons 0 2)(cons 0 4)(cons 0 8)(cons 0 16)(cons 0 32)) "stream-add-zero test")
 
    ; cycle-lists test
-   ; (check-equal? (stream-for-n-steps (cycle-lists (list 1 2 3) (list "a" "b")) 3) (list (cons 1 "a") (cons 2 "b") (cons 3 "a")) "cycle-lists test")
+   (check-equal? (stream-for-n-steps (cycle-lists (list 1 2 3) (list "a" "b")) 3)
+                 (list (cons 1 "a") (cons 2 "b") (cons 3 "a")) "cycle-lists test")
 
    ; vector-assoc test
    ; (check-equal? (vector-assoc 4 (vector (cons 2 1) (cons 3 1) (cons 4 1) (cons 5 1))) (cons 4 1) "vector-assoc test")
