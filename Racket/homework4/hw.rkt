@@ -103,7 +103,13 @@
 ; equal to v, else return the first pair with an equal car field. Sample solution is 9 lines, using one local
 ; recursive helper function.
 
-
+(define (vector-assoc v vec)
+  (define (each-elem pos)
+    (if (>= pos (vector-length vec)) #f
+        (let ([fst (vector-ref vec pos)])
+          (if (and (pair? fst) (equal? (car fst) v)) fst
+              (each-elem (+ pos 1))))))
+  (each-elem 0))
 
 ; 10) Write a function cached-assoc that takes a list xs and a number n and returns a function that takes
 ; one argument v and returns the same thing that (assoc v xs) would return. However, you should
@@ -127,6 +133,18 @@
 ;     cache and when you are not. But remove these print expressions before submitting your code.
 ;   • Sample solution is 15 lines.
 
+(define (cached-assoc xs n)
+  (define cache (make-vector n #f))
+  (define curr-pos 0)
+  (lambda (v)
+    (define cached? (vector-assoc v cache))
+    (if cached? cached?
+        (let ([found? (assoc v xs)])
+          (if found?
+              (begin
+                (vector-set! cache (remainder curr-pos (vector-length cache)) found?)
+                (set! curr-pos (+ curr-pos 1))
+                found?) #f)))))
 
 
 ; 11) (Challenge Problem) Define a macro that is used like (while-less e1 do e2) where e1 and e2
@@ -147,6 +165,10 @@
 ; Evaluating the second line will print "x" 5 times and change a to be 7. So evaluating the third line
 ;will print "x" 1 time and change a to be 8.
 
-
-
+(define-syntax while-less
+  (syntax-rules (do)
+    [(while-less e1 do e2)
+     (let ([ve1 e1]
+           [continued? (lambda () (if (>= e2 ve1) #t (continued?)))])
+       (continued?))]))
 
