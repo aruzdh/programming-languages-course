@@ -73,27 +73,62 @@
 ; of the second stream and so on, and it will go back to the first stream when it reaches the end of the list.
 ; Try to do this without ever adding an element to the end of a list.
 
+(define (interleave ss)
+  (define streams (list->vector ss))
+  (define length-stream (length ss))
+  (define (helper strs curr)
+    (define pos (remainder curr length-stream))
+    (define curr-stream (vector-ref strs pos))
+    (cons (car curr-stream)
+          (begin (vector-set! streams pos ((cdr curr-stream)))
+                 (lambda () (helper streams (+ curr 1))))))
+  (helper streams 0))
 
+; (define double-fib (stream-map (lambda (x) (* x 2) ) fibonacci))
+; (stream-for-n-steps (interleave (list fibonacci double-fib)) 20)
 
 ; 8) Define a function -pack- that takes an integer -n- and a stream -s-, and returns a stream that produces the same
 ; values as -s- but packed in list of -n- elements. So the first value of the new stream will be the list consisting
 ; of the first -n- values of -s-, the second value of the new stream will contain the next -n- values, and so on.
 
+(define (pack n s)
+  (define (join curr str acc)
+    (if (= curr 0) (cons (reverse acc) str) (join (- curr 1) ((cdr str)) (cons (car str) acc))))
+  (define (helper vals)
+    (cons (car vals) (lambda () (helper (join n (cdr vals) empty )) )))
+  (helper (join n s empty)))
 
+; (define p (pack 3 fibonacci))
+; (stream-for-n-steps p 10)
 
 ; 9) We'll use Newton's Method for approximating the square root of a number, but by producing a stream of ever-better
 ; approximations so that clients can "decide later" how approximate a result they want: Write a function -sqrt-stream-
 ; that takes a number -n-, starts with -n- as an initial guess in the stream, and produces successive guesses applying
 ; -fn_n(x) = 1/2 (x + n/x) to the current guess
 
+(define (sqrt-stream n)
+  (define (next-guess x) (* 0.5 (+ x (/ n x))))
+  (define (sqrt-stream-iter guess)
+    (cons guess (lambda () (sqrt-stream-iter (next-guess guess)))))
+  (sqrt-stream-iter n))
 
+; (stream-for-n-steps (sqrt-stream 438) 10)
+(stream-for-n-steps (sqrt-stream 64) 10)
 
 ; 10) Now use -sqrt-stream- from the previous problem to define a function -approx-sqrt- that takes two numbers -n-
 ; and -e- and returns a number -x- such that -x (times) X- is within -e- of -n-. Be sure not to create more than one
 ; stream nor ask for the same value from the stream more that once. Note: Because Racket defaults to fully precise
 ; rational values, you may wish to use a floating-point number for -n- (e.g. 10.0 intead of 10) as well as of -e-
 
+(define (approx-sqrt n e)
+  (define (helper s)
+    (define approx (car s))
+    (if (and (<= (* approx approx) (+ n e)) (>= (* approx approx) n))
+        approx
+        (helper ((cdr s)))))
+  (helper (sqrt-stream n)))
 
+; (approx-sqrt 64 0.1)
 
 ; 11) Write a macro perform that has the following two forms:
 ; (perform e1 if e2)
