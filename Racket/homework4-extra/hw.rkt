@@ -3,6 +3,13 @@
 
 (provide (all-defined-out))
 
+; Helper function to obtain n values from a stream
+;
+(define (stream-for-n-steps s n)
+  (cond
+    [(= n 0) empty]
+    [#t (cons (car s) (stream-for-n-steps ((cdr s)) (- n 1)))]))
+
 ; 1) Write a function -palindromic- that takes a list of numbers and evaluates to a list of numbers of the same
 ; lenght, where each element is obtained as follows: the first element should be the sum of the first and the last
 ; elements of the original list, the second one should be the sum of the second and second to last elements of
@@ -10,17 +17,33 @@
 ;
 ; Example: (palindromic (list 1 2 4 8)) = (list 9 6 6 9)
 
+(define (palindromic ns)
+  (define rev (reverse ns))
+  (define (helper n r acc)
+    (if (empty? n) acc
+        (helper (rest n) (rest r) (cons (+ (first n) (first r)) acc))))
+  (helper ns rev empty))
 
+; (palindromic (list 1 2 4 8))
 
 ; 2) Define a stream -fibonacci-, the first element of which is 0, the second one is 1, and each successive element
 ; is the sum of twe immediately preceding elements
 
 
+(define fibonacci
+  (letrec [(f (lambda (x prev) (cons x (lambda () (f (+ prev x) x)))))]
+    (f 0 1)))
+
+; (stream-for-n-steps fibonacci 10)
 
 ; 3) Write a function -stream-until- that takes a function -f- and a stream -s-, and applies -f- to the values of
 ; -s- in succession until -f- evaluates to #f
 
-
+(define (stream-until f s)
+  (define (helper str)
+    (define curr (f (car str)))
+    (if curr (cons curr (lambda () (helper (cdr str)))) '()))
+  (helper s))
 
 ; 4) Write a function -stream-map- that takes a function -f- and a stream -s-, and returns a new stream whose values
 ; are the result of applying -f- to the values produced by -s-

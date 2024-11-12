@@ -3,6 +3,10 @@
 
 (provide (all-defined-out))
 
+; All streams here are "wrong" because I was trating a stream as a funcction instead of a pair
+; (whith is the real "meaning" of a stream)
+; In general, the basic structure is almost correct
+
 ; 1) Write a function sequence that takes 3 arguments low, high, and stride, all assumed to be numbers.
 ; Further assume stride is positive. sequence produces a list of numbers from low to high (including
 ; low and possibly high) separated by stride and in sorted order. Sample solution: 4 lines.
@@ -42,6 +46,12 @@
 ; 4) Write a function stream-for-n-steps that takes a stream s and a number n. It returns a list holding
 ; the first n values produced by s in order. Assume n is non-negative. Sample solution: 5 lines. Note:
 ; You can test your streams with this function instead of the graphics code.
+
+; This is the "real" function that handle a correct stream (pair instead of a function)
+#| (define (stream-for-n-steps s n) |#
+#|   (cond |#
+#|     [(= n 0) empty] |#
+#|     [#t (cons (car s) (stream-for-n-steps ((cdr s)) (- n 1)))])) |#
 
 (define (stream-for-n-steps s n)
   (cond
