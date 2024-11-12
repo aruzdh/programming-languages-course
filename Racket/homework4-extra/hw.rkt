@@ -29,7 +29,6 @@
 ; 2) Define a stream -fibonacci-, the first element of which is 0, the second one is 1, and each successive element
 ; is the sum of twe immediately preceding elements
 
-
 (define fibonacci
   (letrec [(f (lambda (x prev) (cons x (lambda () (f (+ prev x) x)))))]
     (f 0 1)))
@@ -48,18 +47,26 @@
 ; 4) Write a function -stream-map- that takes a function -f- and a stream -s-, and returns a new stream whose values
 ; are the result of applying -f- to the values produced by -s-
 
+(define (stream-map f s)
+  (cons (f (car s)) (lambda () (stream-map f ((cdr s))))))
 
+; (stream-for-n-steps (stream-map (lambda (x) (* x 2)) fibonacci ) 10)
 
-; 5) Write a function -stream-zip- that takes in two streams -s1- and -s2- and returns a strteam that produces the
+; 5) Write a function -stream-zip- that takes in two streams -s1- and -s2- and returns a stream that produces the
 ; pairs that result from the other two streams (so the first value for the result stream will be the pair of the
 ; first value of -s1- and the first value of -s2-)
 
+(define (stream-zip s1 s2)
+  (cons (cons (car s1) (car s2)) (lambda () (stream-zip ((cdr s1)) ((cdr s2))))))
 
+; (define double-fib (stream-map (lambda (x) (* x 2) ) fibonacci))
+; (stream-for-n-steps (stream-zip fibonacci double-fib) 10)
 
 ; 6) Thought experiment: Why can you not write a function -stream-reverse- that is like Racket's reverse function
 ; for lists but works on streams
 
-
+; We can't write a function like that because a stream, by definition, it's a infinite sequence,
+; so, we never can get the last element in order to use in as the new first one in the reverse stream.
 
 ; 7) Write a function -interleave- that takes a list of streams and produces a new stream that takes one element
 ; from each stream in sequence. So it will first produce the first value of the first stream, then the first value
