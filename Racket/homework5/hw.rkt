@@ -213,24 +213,33 @@
 ;; (a) Write a Racket function ifaunit that takes three mupl expressions e1, e2, and e3. It returns a mupl expression
 ;;  that when run evaluates e1 and if the result is mupl’s aunit then it evaluates e2 and that is the overall result,
 ;;  else it evaluates e3 and that is the overall result. Sample solution: 1 line.
-;;
-;; (b) Write a Racket function mlet* that takes a Racket list of Racket
-;;  pairs ’((s1 . e1) . . . (si . ei) . . . (sn . en)) and a final mupl expression en+1. In each pair, assume si is a
+
+(define (ifaunit e1 e2 e3) (if (aunit? e1) e2 e3))
+
+;; (b) Write a Racket function mlet* that takes a Racket list of Racket pairs
+;;  ’((s1 . e1) . . . (si . ei) . . . (sn . en)) and a final mupl expression en+1. In each pair, assume si is a
 ;;  Racket string and ei is a mupl expression. mlet* returns a mupl expression whose value is en+1 evaluated in an
 ;;  environment where each si is a variable bound to the result of evaluating the corresponding ei for 1 ≤ i ≤ n.
 ;;  The bindings are done sequentially, so that each ei is evaluated in an environment where s1 through si−1 have been
 ;;  previously bound to the values e1 through ei−1.
-;;
+
+(define (mlet* lstlst e2)
+  (define (helper lst)
+    (if (empty? lst) empty
+        (cons (cons (car (first lst)) (cdr (first lst))) (helper (rest lst)))))
+  (eval-under-env e2 (helper lstlst)))
+
 ;; (c) Write a Racket function ifeq that takes four mupl expressions e1, e2, e3, and e4 and returns a mupl expression
 ;;  that acts like ifgreater except e3 is evaluated if and only if e1 and e2 are equal integers. Assume none of the
 ;;  arguments to ifeq use the mupl variables _x or _y. Use this assumption so that when an expression returned from
 ;;  ifeq is evaluated, e1 and e2 are evaluated exactly once each.
 
-(define (ifaunit e1 e2 e3) "CHANGE")
-
-(define (mlet* lstlst e2) "CHANGE")
-
-(define (ifeq e1 e2 e3 e4) "CHANGE")
+(define (ifeq e1 e2 e3 e4)
+  (define _x (eval-under-env e1 empty))
+  (define _y (eval-under-env e2 empty))
+  (if (and (int? _x) (int? _y))
+      (if (= (int-num _x) (int-num _y)) (eval-under-env e3 empty) (eval-under-env e4 empty))
+      (error "e1 or e2 are not MUPL int")))
 
 ;; Problem 4 - Using the Language:
 ;;
