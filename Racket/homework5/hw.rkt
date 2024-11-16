@@ -68,15 +68,24 @@
 (struct closure (env fun) #:transparent)
 
 ;; Problem 1 - Warm-Up:
-;;
+
 ;; (a) Write a Racket function racketlist->mupllist that takes a Racket list (presumably of mupl values but that
 ;;  will not affect your solution) and produces an analogous mupl list with the same elements in the same order.
-;;
+
+(define (racketlist->mupllist rl)
+  (cond
+    [(empty? rl) (aunit)]
+    [else (apair (first rl) (racketlist->mupllist (cdr rl)))]))
+
 ;; (b) Write a Racket function mupllist->racketlist that takes a mupl list (presumably of mupl values but that will
 ;;  not affect your solution) and produces an analogous Racket list (of mupl values) with the same elements in the
 ;;  same order.
 ;;
-;; CHANGE (put your solutions here)
+
+(define (mupllist->racketlist ml)
+  (cond
+    [(aunit? ml) empty]
+    [else (cons (apair-e1 ml) (mupllist->racketlist (apair-e2 ml)))]))
 
 ;; Problem 2 - Implementing the mupl Language:
 ;;
@@ -138,19 +147,57 @@
 ;; DO add more cases for other kinds of MUPL expressions.
 ;; We will test eval-under-env by calling it directly even though
 ;; "in real life" it would be a helper function of eval-exp.
+
+#| TODO: All values (including closures) evaluate to themselves.
+         For example, (eval-exp (int 17)) would return (int 17), not 17.  |#
+
 (define (eval-under-env e env)
-  (cond [(var? e)
-         (envlookup env (var-string e))]
-        [(add? e)
-         (let ([v1 (eval-under-env (add-e1 e) env)]
-               [v2 (eval-under-env (add-e2 e) env)])
-           (if (and (int? v1)
-                    (int? v2))
-               (int (+ (int-num v1)
-                       (int-num v2)))
-               (error "MUPL addition applied to non-number")))]
-        ;; CHANGE add more cases here
-        [#t (error (format "bad MUPL expression: ~v" e))]))
+  (cond
+    [(int? e) e]
+    [(var? e) (envlookup env (var-string e))]
+    [(add? e)
+     (define v1 (eval-under-env (add-e1 e) env))
+     (define v2 (eval-under-env (add-e2 e) env))
+     (if (and (int? v1) (int? v2))
+         (int (+ (int-num v1) (int-num v2)))
+         (error "MUPL addition applied to non-number"))]
+    [(fun? e) (closure env e)]
+    [(ifgreater? e)
+     (define v1 (ifgreater-e1 e))
+     (define v2 (ifgreater-e2 e))
+     (if (and (int? v1) (int? v2))
+         (if (> (int-num v1) (int-num v2)) (ifgreater-e3 e) (ifgreater-e4 e))
+         (error "MUPL e1 or e2 are not MUPL int"))]
+    [(mlet? e)
+     (define v (mlet-e e))
+     (eval-under-env (mlet-body e) (cons (cons (mlet-var e) v) env))]
+    [(call? e)
+     (define fnx (call-funexp e))
+     (define act (call-actual e))
+     (if (closure? fnx)
+         (letrec
+             [(closure-fn (closure-fun fnx))
+              (body (fun-body closure-fn))
+              (fn-name (fun-nameopt closure-fn))
+              (new-env1(if fn-name (cons (cons (fn-name closure-fn) fnx) env) env))
+              (new-env2 (cons (fun-formal closure-fn) act))]
+           (eval-under-env body (cons new-env2 new-env1)))
+         (error "The first argument is not a closure"))]
+    [(apair? e) (apair (eval-under-env (apair-e1 e) env) (eval-under-env (apair-e2) env))]
+    [(fst? e)
+     (define sube (fst-e e))
+     (if (apair? sube)
+         (apair-e1 sube)
+         (error "The argument is not an apair"))]
+    [(snd? e)
+     (define sube (snd-e e))
+     (if (apair? sube)
+         (apair-e2 sube)
+         (error "The argument is not an apair"))]
+    [(isaunit? e)
+     (define poss-unit (isaunit-e e))
+     (if (unit? poss-unit) (int 1) (int 0))]
+    [else (error (format "bad MUPL expression: ~v" e))]))
 
 ;; Do NOT change
 (define (eval-exp e)
