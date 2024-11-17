@@ -250,12 +250,12 @@
 ;;  function should be curried: it should take a mupl function and return a mupl function that takes a mupl list and
 ;;  applies the function to every element of the list returning a new mupl list. Recall a mupl list is aunit or a pair
 ;;  where the second component is a mupl list.
-;;
+
+(define mupl-map "CHANGE")
+
 ;; (b) Bind to the Racket variable mupl-mapAddN a mupl function that takes an mupl integer i and returns a mupl
 ;;  function that takes a mupl list of mupl integers and returns a new mupl list of mupl integers that adds i to every
 ;;  element of the list. Use mupl-map (a use of mlet is given to you to make this easier).
-
-(define mupl-map "CHANGE")
 
 (define mupl-mapAddN
   (mlet "map" mupl-map
