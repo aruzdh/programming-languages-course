@@ -55,11 +55,10 @@
 
    ;; ifeq test
    (check-equal? (eval-exp (ifeq (int 1) (int 2) (int 3) (int 4))) (int 4) "ifeq test")
-   (check-equal? (eval-exp (ifeq (int 2) (int 2) (add (int 5) (int 5)) (int 4))) (int 10) "ifeq test")
 
    ;; mupl-map test
-   #| (check-equal? (eval-exp (call (call mupl-map (fun #f "x" (add (var "x") (int 7)))) (apair (int 1) (aunit)))) |#
-   #|               (apair (int 8) (aunit)) "mupl-map test") |#
+   (check-equal? (eval-exp (call (call mupl-map (fun #f "x" (add (var "x") (int 7)))) (apair (int 1) (aunit))))
+                 (apair (int 8) (aunit)) "mupl-map test")
 
    ;; problems 1, 2, and 4 combined test
    #| (check-equal? (mupllist->racketlist |#

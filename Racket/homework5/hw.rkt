@@ -160,6 +160,7 @@
          (error "MUPL addition applied to non-number"))]
     [(closure? e) e]
     [(aunit? e) e]
+    [(fun? e) (closure env e)]
     [(ifgreater? e)
      (define v1 (eval-under-env (ifgreater-e1 e) env))
      (define v2 (eval-under-env (ifgreater-e2 e) env))
@@ -217,8 +218,7 @@
 ;;  that when run evaluates e1 and if the result is mupl’s aunit then it evaluates e2 and that is the overall result,
 ;;  else it evaluates e3 and that is the overall result. Sample solution: 1 line.
 
-(define (ifaunit e1 e2 e3)
-  (if (aunit? (eval-under-env e1 empty)) (eval-under-env e2 empty) (eval-under-env e3 empty)))
+(define (ifaunit e1 e2 e3) (ifgreater (isaunit e1) (int 0) e2 e3))
 
 ;; (b) Write a Racket function mlet* that takes a Racket list of Racket pairs
 ;;  ’((s1 . e1) . . . (si . ei) . . . (sn . en)) and a final mupl expression en+1. In each pair, assume si is a
@@ -228,28 +228,16 @@
 ;;  previously bound to the values e1 through ei−1.
 
 (define (mlet* lstlst e2)
-  (define (helper lst curr-env)
-    (if (empty? lst) curr-env
-        (letrec
-            [(fst-ei (first lst))
-             (eval-ei (eval-under-env (cdr fst-ei) curr-env))
-             (new-env (cons (car fst-ei) eval-ei))]
-          (helper (rest lst) (cons new-env curr-env)))))
-  (eval-under-env e2 (helper lstlst empty)))
+  (if (empty? lstlst)
+      e2
+      (mlet (caar lstlst) (cdar lstlst) (mlet* (cdr lstlst) e2))))
 
 ;; (c) Write a Racket function ifeq that takes four mupl expressions e1, e2, e3, and e4 and returns a mupl expression
 ;;  that acts like ifgreater except e3 is evaluated if and only if e1 and e2 are equal integers. Assume none of the
 ;;  arguments to ifeq use the mupl variables _x or _y. Use this assumption so that when an expression returned from
 ;;  ifeq is evaluated, e1 and e2 are evaluated exactly once each.
 
-(define (ifeq e1 e2 e3 e4)
-  (define _x (eval-under-env e1 empty))
-  (define _y (eval-under-env e2 empty))
-  (if (and (int? _x) (int? _y))
-      (if (= (int-num _x) (int-num _y))
-          (eval-under-env e3 empty)
-          (eval-under-env e4 empty))
-      (error "Either, the first or second argument are not MUPL int")))
+(define (ifeq e1 e2 e3 e4) (mlet "_x" e1 (mlet "_y" e2 (if (equal? (var "_x") (var "_y")) e3 e4))))
 
 ;; Problem 4 - Using the Language:
 ;;
@@ -261,7 +249,12 @@
 ;;  applies the function to every element of the list returning a new mupl list. Recall a mupl list is aunit or a pair
 ;;  where the second component is a mupl list.
 
-(define mupl-map "CHANGE")
+(define mupl-map
+  (fun "first-fn" "fn-apply"
+       (fun "final-fn" "lst"
+            (ifaunit (var "lst") (aunit)
+                     (apair (call (var "fn-apply") (fst (var "lst")))
+                            (call (var "final-fn") (snd (var "lst"))))))))
 
 ;; (b) Bind to the Racket variable mupl-mapAddN a mupl function that takes an mupl integer i and returns a mupl
 ;;  function that takes a mupl list of mupl integers and returns a new mupl list of mupl integers that adds i to every
