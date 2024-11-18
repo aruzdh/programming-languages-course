@@ -148,9 +148,6 @@
 ;; We will test eval-under-env by calling it directly even though
 ;; "in real life" it would be a helper function of eval-exp.
 
-#| TODO: All values (including closures) evaluate to themselves.
-         For example, (eval-exp (int 17)) would return (int 17), not 17.  |#
-
 (define (eval-under-env e env)
   (cond
     [(int? e) e]
@@ -161,42 +158,48 @@
      (if (and (int? v1) (int? v2))
          (int (+ (int-num v1) (int-num v2)))
          (error "MUPL addition applied to non-number"))]
-    [(fun? e) (closure env e)]
+    [(closure? e) e]
+    [(aunit? e) e]
     [(ifgreater? e)
-     (define v1 (ifgreater-e1 e))
-     (define v2 (ifgreater-e2 e))
+     (define v1 (eval-under-env (ifgreater-e1 e) env))
+     (define v2 (eval-under-env (ifgreater-e2 e) env))
      (if (and (int? v1) (int? v2))
-         (if (> (int-num v1) (int-num v2)) (ifgreater-e3 e) (ifgreater-e4 e))
-         (error "MUPL e1 or e2 are not MUPL int"))]
+         (if (> (int-num v1) (int-num v2))
+             (eval-under-env (ifgreater-e3 e) env)
+             (eval-under-env (ifgreater-e4 e) env))
+         (error "Either argument 1 and 2 are not MUPL int"))]
     [(mlet? e)
-     (define v (mlet-e e))
+     (define v (eval-under-env (mlet-e e) env))
      (eval-under-env (mlet-body e) (cons (cons (mlet-var e) v) env))]
-    [(call? e)
-     (define fnx (call-funexp e))
-     (define act (call-actual e))
-     (if (closure? fnx)
-         (letrec
-             [(closure-fn (closure-fun fnx))
-              (body (fun-body closure-fn))
-              (fn-name (fun-nameopt closure-fn))
-              (new-env1(if fn-name (cons (cons (fn-name closure-fn) fnx) env) env))
-              (new-env2 (cons (fun-formal closure-fn) act))]
-           (eval-under-env body (cons new-env2 new-env1)))
-         (error "The first argument is not a closure"))]
-    [(apair? e) (apair (eval-under-env (apair-e1 e) env) (eval-under-env (apair-e2) env))]
+    [(apair? e)
+     (define e1 (eval-under-env (apair-e1 e) env))
+     (define e2 (eval-under-env (apair-e2 e) env))
+     (apair e1 e2)]
     [(fst? e)
-     (define sube (fst-e e))
-     (if (apair? sube)
-         (apair-e1 sube)
-         (error "The argument is not an apair"))]
+     (define inside (eval-under-env (fst-e e) env))
+     (if (apair? inside) (apair-e1 inside) (error "The argument is not a MUPL apair"))]
     [(snd? e)
-     (define sube (snd-e e))
-     (if (apair? sube)
-         (apair-e2 sube)
-         (error "The argument is not an apair"))]
+     (define inside (eval-under-env (snd-e e) env))
+     (if (apair? inside) (apair-e2 inside) (error "The argument is not a MUPL apair"))]
     [(isaunit? e)
-     (define poss-unit (isaunit-e e))
-     (if (unit? poss-unit) (int 1) (int 0))]
+     (define inside (eval-under-env (isaunit-e e) env))
+     (if (aunit? inside) (int 1) (int 0))]
+    ([call? e]
+     (define closure (eval-under-env (call-funexp e) env))
+     (define argument (eval-under-env (call-actual e) env))
+     (if (closure? closure)
+         (letrec
+             [(closure-enviroment (closure-env closure))
+              (function (closure-fun closure))
+              (function-body (fun-body function))
+              (function-name (fun-nameopt function))
+              (function-arg-name (fun-formal function))
+              (new-env1 (if function-name
+                            (cons (cons function-name closure) closure-enviroment)
+                            closure-enviroment))
+              (new-env2 (cons (cons function-arg-name argument) new-env1))]
+           (eval-under-env function-body new-env2))
+         (error "The first argument is not a closure")))
     [else (error (format "bad MUPL expression: ~v" e))]))
 
 ;; Do NOT change
