@@ -250,7 +250,7 @@
 ;;  where the second component is a mupl list.
 
 (define mupl-map
-  (fun "first-fn" "fn-apply"
+  (fun #f "fn-apply"
        (fun "final-fn" "lst"
             (ifaunit (var "lst") (aunit)
                      (apair (call (var "fn-apply") (fst (var "lst")))
@@ -262,7 +262,10 @@
 
 (define mupl-mapAddN
   (mlet "map" mupl-map
-        "CHANGE (notice map is now in MUPL scope)"))
+        (fun #f "int"
+             (fun #f "lst"
+                  (call (call (var "map") (fun #f "elem" (add (var "int") (var "elem"))))
+                        (var "lst"))))))
 
 ;; Challenge Problem:
 ;;
