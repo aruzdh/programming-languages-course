@@ -44,14 +44,18 @@
    (check-equal? (eval-exp (isaunit (aunit))) (int 1) "isaunit test")
 
    ;; ifaunit test
-   #| (check-equal? (eval-exp (ifaunit (int 1) (int 2) (int 3))) (int 3) "ifaunit test") |#
-   #| (check-equal? (eval-exp (ifaunit (aunit) (int 2) (int 3))) (int 2) "ifaunit test") |#
+   (check-equal? (eval-exp (ifaunit (int 1) (int 2) (add (int 5) (int 5)))) (int 10) "ifaunit test")
+   (check-equal? (eval-exp (ifaunit (aunit) (int 2) (int 3))) (int 2) "ifaunit test")
 
    ;; mlet* test
-   #| (check-equal? (eval-exp (mlet* (list (cons "x" (int 10))) (var "x"))) (int 10) "mlet* test") |#
+   (check-equal? (eval-exp (mlet* (list (cons "x" (int 10))) (var "x"))) (int 10) "mlet* test")
+   (check-equal? (eval-exp (mlet* (list (cons "x" (int 10)) (cons "y" (var "x"))) (var "y"))) (int 10) "mlet* test")
+   (check-equal? (eval-exp (mlet* (list (cons "x" (int 10)) (cons "y" (int 5)) (cons "z" (add (var "x") (var "y"))))
+                                  (var "z"))) (int 15) "mlet* test")
 
    ;; ifeq test
-   #| (check-equal? (eval-exp (ifeq (int 1) (int 2) (int 3) (int 4))) (int 4) "ifeq test") |#
+   (check-equal? (eval-exp (ifeq (int 1) (int 2) (int 3) (int 4))) (int 4) "ifeq test")
+   (check-equal? (eval-exp (ifeq (int 2) (int 2) (add (int 5) (int 5)) (int 4))) (int 10) "ifeq test")
 
    ;; mupl-map test
    #| (check-equal? (eval-exp (call (call mupl-map (fun #f "x" (add (var "x") (int 7)))) (apair (int 1) (aunit)))) |#

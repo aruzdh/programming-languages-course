@@ -217,7 +217,8 @@
 ;;  that when run evaluates e1 and if the result is mupl’s aunit then it evaluates e2 and that is the overall result,
 ;;  else it evaluates e3 and that is the overall result. Sample solution: 1 line.
 
-(define (ifaunit e1 e2 e3) (if (aunit? e1) e2 e3))
+(define (ifaunit e1 e2 e3)
+  (if (aunit? (eval-under-env e1 empty)) (eval-under-env e2 empty) (eval-under-env e3 empty)))
 
 ;; (b) Write a Racket function mlet* that takes a Racket list of Racket pairs
 ;;  ’((s1 . e1) . . . (si . ei) . . . (sn . en)) and a final mupl expression en+1. In each pair, assume si is a
@@ -227,10 +228,14 @@
 ;;  previously bound to the values e1 through ei−1.
 
 (define (mlet* lstlst e2)
-  (define (helper lst)
-    (if (empty? lst) empty
-        (cons (cons (car (first lst)) (cdr (first lst))) (helper (rest lst)))))
-  (eval-under-env e2 (helper lstlst)))
+  (define (helper lst curr-env)
+    (if (empty? lst) curr-env
+        (letrec
+            [(fst-ei (first lst))
+             (eval-ei (eval-under-env (cdr fst-ei) curr-env))
+             (new-env (cons (car fst-ei) eval-ei))]
+          (helper (rest lst) (cons new-env curr-env)))))
+  (eval-under-env e2 (helper lstlst empty)))
 
 ;; (c) Write a Racket function ifeq that takes four mupl expressions e1, e2, e3, and e4 and returns a mupl expression
 ;;  that acts like ifgreater except e3 is evaluated if and only if e1 and e2 are equal integers. Assume none of the
@@ -241,8 +246,10 @@
   (define _x (eval-under-env e1 empty))
   (define _y (eval-under-env e2 empty))
   (if (and (int? _x) (int? _y))
-      (if (= (int-num _x) (int-num _y)) (eval-under-env e3 empty) (eval-under-env e4 empty))
-      (error "e1 or e2 are not MUPL int")))
+      (if (= (int-num _x) (int-num _y))
+          (eval-under-env e3 empty)
+          (eval-under-env e4 empty))
+      (error "Either, the first or second argument are not MUPL int")))
 
 ;; Problem 4 - Using the Language:
 ;;
