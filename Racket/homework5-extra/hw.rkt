@@ -93,12 +93,79 @@
 
 ; 11) [more challenging] Now we will do something even more clever: remove pairs by using closures environments as
 ; another way to "hold" two pieces of data. Instead of using (apair e1 e2), we can use
-; (mlet "_x" e1 (mlet "_y" e2 (fun #f "_f" (call (call (var "_f") (var "_x")) (var "_y")))))
+; (mlet "_x" e1 (mlet "_y" e2 (fun #f "_f" (call (call (var "_f" (var "_x")) (var "_y"))))))
+; (assuming "_x" isn't already used in e2 -- we will assume that). This will evaluate to a closure that has the result
+; of evaluating e1 and e2 in its environment. When the closure is called with a function, that function will be caled
+; with the result of evaluating e1 and e2 (in curried form). So if we replace every pair expression as described above,
+; then we can, rather cleverly, replace (fst e) with (call e (fun #f "x" (fun #f "y" (var "x")))). Extend your
+; remove-lets, renaming it remove-lets-and-pairs so that it removes all uses of pair, fst, and snd. We are leaving it
+; to you to figure out how to replace (snd e).
+;
+; Note 1: Remember you need to remove things recusively inside of apair,
+; fst, etc., else an expression like (fst (std (var "x"))) won't have the snd removed.
+;
+; Note 2: The resulting program should produce the same result when evaluated if the (original) result doesn't contain
+; any pair values. If the original result does contain pair values, the result after removal will contain corresponding
+; closures.
+;
+; Note 3: A slightly more challenging approach is to change how apair is removed so that we do not need to assume "_y"
+; is not used in e2
+
+
+
+; More MUPL functions
+
+; In the first problem, we treat (int 1) as true in MUPL and (int 0) as false in MUPL
+
+; 12) Define a Racket binding mupl-all that holds a MUPL function that takes a MUPL list and evaluates to (MUPL) true
+; uf all the list elements are (MUPL) true, else it evaluates to (MUPL) false
+
+
+
+; 13) Define a Rakcet binding mupl-append that holds a MUPL function that takes two MUPL lists (in curried form) and
+; appends them
+
+
+
+; 14) Define a binding mupl-zip that holds a MUPL function that takes MUPL lists (in curried form) and retuns a list
+; of pairs (much like ML's zip). If the MUPL lists are different lenghts, ignore a suffix of the longer list (so the
+; returned list of pairs has a lenght equal to the shorter of the argument lenghts)
+
+
+
+; 15) Redo the previous two problems with the MUPL function taking a pair with the arguments rather that using
+; currying
+
+
+
+; 16) Define a Racket binding mupl-curry that holds a MUPL function that is like ML's fun curry
+; f = (fx x y => f (x, y))
+
+
+
+; 17) Define a Racket binding mupl-uncurry that holds a MUPL function that is like ML's
+; fun uncurry = (fn (x, y) => f x y)
+
+
+
+; More MUPL macros
+
+; As above, as needed, we treat (int 1) as true in MUPL and (int 0) as false in MUPL
+
+; 18) Define a Racket binding if-greater3 that is a MUPL macro (a Racket function) that takes 5 MUPL expressions and
+; produces a MUPL program that, whet evaluated, evaluates the 4th subexpression as the result if the 1st subexpression
+; is greater that the 2nd and the 2nd is greater that the 3rd. else in evaluates the 5th expression as the result.
+; When the MUPL program is evaluated, it should always evaluate the 1st, 2nd, and 3rd subexpressions exactly once each
+; and then the 4th subexpression or 5th subexpression but not both
 
 
 
 
-
+; 19) Define a  Racket binding call-curried that is a MUPL macro (a Racket function) that takes a MUPL expression e1
+; and a Racket list of MUPL expression e2 and produces a MUPL program that, when evaluated, calls the result of
+; evaluating e1 as a curried function with all of the results of evaluating the expression in e2
+;
+; For example, instead of writing (call (call e1 ea) eb), you can write (call-curried e1 (list ea eb))
 
 
 
