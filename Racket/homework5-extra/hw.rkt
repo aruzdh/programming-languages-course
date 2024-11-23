@@ -12,23 +12,44 @@
 ; 1) Write a function tree-height that accepts a binary tree and evaluates to a height of this tree. The height of a
 ; tree is the lenght of the longest path to a leaf. Thus the height of a leaf is 0
 
-
+(define (tree-height bt)
+  (if (btree-leaf? bt) 0
+      (+ 1 (max (tree-height (btree-node-left bt)) (tree-height (btree-node-right bt))))))
 
 ; 2) Write a function sum-tree that takes binary tree and sums all the values in all the nodes. (Assume the values
 ; fields all hold numbers, i.e., values that can pass to +)
 
-
+(define (sum-tree bt)
+  (if (btree-leaf? bt) 0
+      (+ (btree-node-value bt) (sum-tree (btree-node-left bt)) (sum-tree (btree-node-right bt)))))
 
 ; 3) Write prune-at-v that takes a binary tree t and a value v and produces a new binary tree with structure the same
 ; as t except any node with value equal to v (use Racket's equal?) is replaced (along with all its descendants) by a
 ; leaf
 
+(define (prune-at-v bt v)
+  (if (or (btree-leaf? bt)(equal? (btree-node-value bt) v)) (btree-leaf)
+      (btree-node (btree-node-value bt)
+                  (prune-at-v (btree-node-left bt) v)
+                  (prune-at-v (btree-node-right bt) v))))
 
+(define tree1
+  (btree-node 10
+              (btree-node 5
+                          (btree-leaf)
+                          (btree-node 2 (btree-leaf) (btree-leaf) ))
+              (btree-node 2
+                          (btree-leaf)
+                          (btree-node 9 (btree-leaf) (btree-leaf) ))))
 
 ; 4) Write a function well-formed-tree? that takes any value and returns #t if and only if the value is legal binary
 ; tree as defined above
 
-
+(define (well-formed-tree val)
+  (cond
+    [(btree-leaf? val) #t]
+    [(btree-node? val) (and (well-formed-tree (btree-node-left val)) (well-formed-tree (btree-node-right val)))]
+    [else #f]))
 
 ; 5) Write a function fold-tree that takes a two-argument function, an initial accumulator, and a binary tree and
 ; implements a fold over the tree, applying the function to all the values.
