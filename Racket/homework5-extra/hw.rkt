@@ -26,6 +26,7 @@
                           (btree-leaf)
                           (btree-node 3 (btree-leaf) (btree-leaf)))
               (btree-leaf)))
+
 (define tree3
   (btree-node 4
               (btree-node 5
