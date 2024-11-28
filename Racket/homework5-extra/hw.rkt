@@ -9,6 +9,29 @@
 (struct btree-leaf () #:transparent)
 (struct btree-node (value left right) #:transparent)
 
+; BTrees
+
+(define tree1
+  (btree-node 10
+              (btree-node 5
+                          (btree-leaf)
+                          (btree-node 2 (btree-leaf) (btree-leaf) ))
+              (btree-node 2
+                          (btree-leaf)
+                          (btree-node 9 (btree-leaf) (btree-leaf) ))))
+
+(define tree2
+  (btree-node 4
+              (btree-node 5
+                          (btree-leaf)
+                          (btree-node 3 (btree-leaf) (btree-leaf)))
+              (btree-leaf)))
+(define tree3
+  (btree-node 4
+              (btree-node 5
+                          (btree-leaf)
+                          (btree-leaf)) (btree-leaf)))
+
 ; 1) Write a function tree-height that accepts a binary tree and evaluates to a height of this tree. The height of a
 ; tree is the lenght of the longest path to a leaf. Thus the height of a leaf is 0
 
@@ -33,15 +56,6 @@
                   (prune-at-v (btree-node-left bt) v)
                   (prune-at-v (btree-node-right bt) v))))
 
-(define tree1
-  (btree-node 10
-              (btree-node 5
-                          (btree-leaf)
-                          (btree-node 2 (btree-leaf) (btree-leaf) ))
-              (btree-node 2
-                          (btree-leaf)
-                          (btree-node 9 (btree-leaf) (btree-leaf) ))))
-
 ; 4) Write a function well-formed-tree? that takes any value and returns #t if and only if the value is legal binary
 ; tree as defined above
 
@@ -60,11 +74,22 @@
 ; would evaluates to 18. You can traverse the tree in any order you like (though it does affect the result af a call
 ; to fold-tree if the function passed isn't associative)
 
-
+(define (fold-tree fn acc bt)
+  (if (btree-leaf? bt) acc
+      (fn (btree-node-value bt)
+          (fold-tree fn (fold-tree fn acc (btree-node-left bt)) (btree-node-right bt)))))
 
 ; 6) Reimplement fold-tree as a curried function
 
+(define (fold-tree-curried fn)
+  (lambda (acc)
+    (lambda (bt)
+      (if (btree-leaf? bt) acc
+          (fn (btree-node-value bt)
+              (fold-tree fn (fold-tree fn acc (btree-node-left bt)) (btree-node-right bt)))))))
 
+#| (define f ((fold-tree-curried (lambda (x y) (+ (* 2 x) y))) 0)) |#
+#| (f tree1) |#
 
 ; Dynamic typing
 
