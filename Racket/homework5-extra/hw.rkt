@@ -104,14 +104,29 @@
 ; (crazy-sum (list 10 * 6 / 5 -3)) evaluates to 9. Note: it may superficially look like the function implements infix
 ; syntax for arithmetic expressions, but that's not really the case
 
+(define (crazy-sum lst)
+  (define (helper fn ls acc)
+    (cond
+      [(empty? ls) acc]
+      [(procedure? (first ls)) (helper (first ls) (rest ls) acc)]
+      [else (helper fn (rest ls) (fn acc (first ls)))]))
+  (helper + (rest lst) (first lst)))
 
+#| (crazy-sum (list 1 2 3)) |#
+#| (crazy-sum (list 10 * * 6 / 5 - 3)) |#
 
-
-; 8) Write a function either-fold that is like fold for lists of brinay trees as defined above except that it works
-; for both of them. Given an appropiate errer message if the third argument to either-fold is neither a list or a
+; 8) Write a function either-fold that is like fold for lists or brinay trees as defined above except that it works
+; for both of them. Given an appropiate error message if the third argument to either-fold is neither a list or a
 ; binary-tree
 
+(define (either-fold fn acc structure)
+  (cond
+    [(or (btree-leaf? structure) (btree-node? structure)) (fold-tree fn acc structure)]
+    [(list? structure) (foldl fn 0 structure)]
+    [else error "The structure is neither a btree or a list"]))
 
+#| (either-fold + 0 5) |#
+#| (either-fold (lambda (x y) (+ (* 2 x) y)) 0 tree1) |#
 
 ; 9) Write a function flatten that takes a list and flattens its internal structure, merging all the lists inside into
 ; a single flat list. This should work for lists nested to arbitrary depth.
@@ -120,6 +135,16 @@
 ; (flatten (list 1 2 (list (list 3 4) 5 (list (list 6) 7 8)) 9 (list 10))) should evaluate to
 ; (list 1 2 3 4 5 6 7 8 9 10)
 
+(define (flatten lst)
+  (define (helper ls acc)
+    (cond
+      [(empty? ls) acc]
+      [(list? (first ls)) (helper (rest ls) (helper (first ls) acc)) ]
+      [else (helper (rest ls) (cons (first ls) acc) ) ]))
+  (reverse (helper lst empty)))
+
+(flatten (list 1 2 (list 3 4) ))
+(flatten (list 1 2 (list (list 3 4) 5 (list (list 6) 7 8)) 9 (list 10)))
 
 ; Using lambda-calculus ideas to remove features form MUPL programs
 
