@@ -11,7 +11,7 @@
                       (shifts added by you)
 *)
 datatype geom_exp = 
-           NoPoints
+     NoPoints
 	 | Point of real * real (* represents point (x,y) *)
 	 | Line of real * real (* represents line (slope, intercept) *)
 	 | VerticalLine of real (* x value *)
